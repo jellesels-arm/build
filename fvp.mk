@@ -32,9 +32,15 @@ else
 EDK2_BUILD		?= RELEASE
 endif
 EDK2_BIN		?= $(EDK2_PLATFORMS_PATH)/Build/ArmVExpress-FVP-AArch64/$(EDK2_BUILD)_$(EDK2_TOOLCHAIN)/FV/FVP_$(EDK2_ARCH)_EFI.fd
+USE_FVP_BASE_PLAT	?= 0
+ifeq ($(USE_FVP_BASE_PLAT),1)
+FVP_PATH		?= /opt/fvp/latest
+FVP_BIN			?= FVP_Base_RevC-2xAEMv8A
+else
 FOUNDATION_PATH		?= $(ROOT)/Foundation_Platformpkg
 ifeq ($(wildcard $(FOUNDATION_PATH)),)
 $(error $(FOUNDATION_PATH) does not exist)
+endif
 endif
 GRUB_PATH		?= $(ROOT)/grub
 GRUB_CONFIG_PATH	?= $(BUILD_PATH)/fvp/grub
@@ -174,11 +180,11 @@ grub-clean:
 # Boot Image
 ################################################################################
 .PHONY: boot-img
-boot-img: linux grub buildroot
+boot-img: linux grub buildroot dtb
 	rm -f $(BOOT_IMG)
 	mformat -i $(BOOT_IMG) -n 64 -h 255 -T 131072 -v "BOOT IMG" -C ::
 	mcopy -i $(BOOT_IMG) $(LINUX_PATH)/arch/arm64/boot/Image ::
-	mcopy -i $(BOOT_IMG) $(LINUX_PATH)/arch/arm64/boot/dts/arm/foundation-v8-gicv3-psci.dtb ::
+	mcopy -i $(BOOT_IMG) $(DTB) ::/fvp.dtb
 	mmd -i $(BOOT_IMG) ::/EFI
 	mmd -i $(BOOT_IMG) ::/EFI/BOOT
 	mcopy -i $(BOOT_IMG) $(ROOT)/out-br/images/rootfs.cpio.gz ::/initrd.img
@@ -190,6 +196,31 @@ boot-img-clean:
 	rm -f $(BOOT_IMG)
 
 ################################################################################
+# DTB
+################################################################################
+ifeq ($(USE_FVP_BASE_PLAT),1)
+DTSI_PATH	?= $(TF_A_PATH)/fdts
+DTS_PATH	?= $(TF_A_PATH)/fdts
+DTS		?= fvp-base-gicv3-psci-1t
+DTS_PRE		?= $(OUT_PATH)/$(DTS).pre.dts
+DTB		?= $(OUT_PATH)/$(DTS).dtb
+
+$(DTB): $(DTS_PATH)/$(DTS).dts
+	gcc -E -P -nostdinc -undef -x assembler-with-cpp -I$(DTSI_PATH) \
+		-I$(TF_A_PATH)/include -o $(DTS_PRE) $(DTS_PATH)/$(DTS).dts
+	dtc -i$(DTSI_PATH) -I dts -O dtb -o $(DTB) $(DTS_PRE)
+
+.PHONY: dtb-clean
+dtb-clean:
+	@rm -f $(DTB) $(DTS_PRE)
+else
+DTB	:= $(LINUX_PATH)/arch/arm64/boot/dts/arm/foundation-v8-gicv3-psci.dtb
+endif
+
+.PHONY: dtb
+dtb: $(DTB)
+
+################################################################################
 # Run targets
 ################################################################################
 # This target enforces updating root fs etc
@@ -197,6 +228,18 @@ run: all
 	$(MAKE) run-only
 
 run-only:
+ifeq ($(USE_FVP_BASE_PLAT),1)
+	$(FVP_PATH)/$(FVP_BIN) \
+	-C bp.flashloader0.fname=$(TF_A_PATH)/build/fvp/$(TF_A_BUILD)/fip.bin \
+	-C bp.secureflashloader.fname=$(TF_A_PATH)/build/fvp/$(TF_A_BUILD)/bl1.bin \
+	-C bp.secure_memory=1 \
+	-C bp.ve_sysregs.exit_on_shutdown=1 \
+	-C bp.virtioblockdevice.image_path=$(BOOT_IMG) \
+	-C cache_state_modelled=0 \
+	-C cluster0.NUM_CORES=4 \
+	-C cluster1.NUM_CORES=4 \
+	-C pctl.startup=0.0.0.0
+else
 	@cd $(FOUNDATION_PATH); \
 	$(FOUNDATION_PATH)/models/Linux64_GCC-6.4/Foundation_Platform \
 	--arm-v8.0 \
@@ -207,4 +250,4 @@ run-only:
 	--data="$(TF_A_PATH)/build/fvp/$(TF_A_BUILD)/bl1.bin"@0x0 \
 	--data="$(TF_A_PATH)/build/fvp/$(TF_A_BUILD)/fip.bin"@0x8000000 \
 	--block-device=$(BOOT_IMG)
-
+endif
