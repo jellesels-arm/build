@@ -47,6 +47,8 @@ GRUB_CONFIG_PATH	?= $(BUILD_PATH)/fvp/grub
 OUT_PATH		?= $(ROOT)/out
 GRUB_BIN		?= $(OUT_PATH)/bootaa64.efi
 BOOT_IMG		?= $(OUT_PATH)/boot-fat.uefi.img
+OVERLAY_DIR		?= ${BUILD_PATH}/fvp/overlay
+SHARED_DIR		?= $(ROOT)/shared
 
 ################################################################################
 # Targets
@@ -175,12 +177,23 @@ grub-clean:
 	@rm -f $(GRUB_BIN)
 	@rm -f $(GRUB_PATH)/configure
 
+################################################################################
+# Buildroot
+################################################################################
+BR2_ROOTFS_OVERLAY=$(OVERLAY_DIR)
+
+################################################################################
+# Shared directory
+################################################################################
+.PHONY: shared_directory
+shared_directory:
+	mkdir -p $(SHARED_DIR)
 
 ################################################################################
 # Boot Image
 ################################################################################
 .PHONY: boot-img
-boot-img: linux grub buildroot dtb
+boot-img: linux grub buildroot dtb shared_directory
 	rm -f $(BOOT_IMG)
 	mformat -i $(BOOT_IMG) -n 64 -h 255 -T 131072 -v "BOOT IMG" -C ::
 	mcopy -i $(BOOT_IMG) $(LINUX_PATH)/arch/arm64/boot/Image ::
@@ -235,6 +248,7 @@ ifeq ($(USE_FVP_BASE_PLAT),1)
 	-C bp.secure_memory=1 \
 	-C bp.ve_sysregs.exit_on_shutdown=1 \
 	-C bp.virtioblockdevice.image_path=$(BOOT_IMG) \
+	-C bp.virtiop9device.root_path=$(SHARED_DIR) \
 	-C cache_state_modelled=0 \
 	-C cluster0.NUM_CORES=4 \
 	-C cluster1.NUM_CORES=4 \

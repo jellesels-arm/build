@@ -12,4 +12,16 @@
 		compatible = "arm,ffa";
 		conduit = "smc";
 	};
+
+	smb@0,0 {
+		motherboard {
+			iofpga@3,00000000 {
+				virtio_p9@140000 {
+					compatible = "virtio,mmio";
+					reg = <0x140000 0x1000>;
+					interrupts = <0 0x2b 4>;
+				};
+			};
+		};
+	};
 };
