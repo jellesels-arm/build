@@ -1,0 +1,15 @@
+#include "fvp-base-gicv3-psci-1t.dts"
+
+/ {
+	firmware {
+		optee {
+			compatible = "linaro,optee-tz";
+			method = "ffa";
+		};
+	};
+
+	ffa {
+		compatible = "arm,ffa";
+		conduit = "smc";
+	};
+};
