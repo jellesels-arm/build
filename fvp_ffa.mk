@@ -66,3 +66,12 @@ endef
 $(eval $(call build-sp,secure-storage))
 $(eval $(call build-sp,crypto))
 
+# Add targets to build the "arm_ffa_user" Linux Kernel module.
+arm_ffa_user: linux
+	$(eval ROOT:=$(CURDIR)/..)
+	make -C $(CURDIR)/../linux_poc $(LINUX_COMMON_FLAGS) install
+
+arm_ffa_user_clean:
+	make -C $(CURDIR)/../linux_poc clean
+
+all: arm_ffa_user
