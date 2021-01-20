@@ -220,7 +220,7 @@ DTS		?= fvp-base-gicv3-psci-1t
 DTS_PRE		?= $(OUT_PATH)/$(DTS).pre.dts
 DTB		?= $(OUT_PATH)/$(DTS).dtb
 
-$(DTB): $(DTS_PATH)/$(DTS).dts
+$(DTB): $(DTS_PATH)/$(DTS).dts $(OUT_PATH)
 	gcc -E -P -nostdinc -undef -x assembler-with-cpp -I$(DTSI_PATH) \
 		-I$(TF_A_PATH)/include -o $(DTS_PRE) $(DTS_PATH)/$(DTS).dts
 	dtc -i$(DTSI_PATH) -I dts -O dtb -o $(DTB) $(DTS_PRE)
