@@ -39,7 +39,7 @@ TS_INSTALL_PREFIX:=$(CURDIR)/../out-ts
 define build-sp
 .PHONY: ffa-$1-sp
 ffa-$1-sp: ffa-$1-sp-build
-	$$(eval include $${TS_INSTALL_PREFIX}/lib/make/$1.mk)
+	$$(eval include $${TS_INSTALL_PREFIX}/opteesp/lib/make/$1.mk)
 
 .PHONY: ffa-$1-sp-build
 ffa-$1-sp-build: optee-os-spdevkit
@@ -65,6 +65,9 @@ endef
 
 $(eval $(call build-sp,secure-storage))
 $(eval $(call build-sp,crypto))
+
+ffa-sp-realclean:
+	rm -rf $(TS_INSTALL_PREFIX)/opteesp
 
 # Add targets to build the "arm_ffa_user" Linux Kernel module.
 arm_ffa_user: linux
