@@ -2,6 +2,9 @@ DTS				?= optee_ffa
 DTS_PATH			?= $(BUILD_PATH)/fvp
 USE_FVP_BASE_PLAT		?= 1
 
+# Use "embedded" or "fip"
+SP_PACKAGING_METHOD		?= embedded
+
 OPTEE_OS_COMMON_EXTRA_FLAGS	+= CFG_CORE_SEL1_SPMC=y CFG_CORE_FFA=y
 OPTEE_OS_COMMON_EXTRA_FLAGS	+= CFG_WITH_SP=y
 OPTEE_OS_COMMON_EXTRA_FLAGS	+= O=out/arm
@@ -32,9 +35,22 @@ TS_INSTALL_PREFIX:=$(CURDIR)/../out-ts
 #   ffa-<sp name>-sp-clean      - run make clean on the cmake project
 #   ffa-<sp name>-sp-realclean  - remove all cmake output
 #
+# To run these for each SP in one step, the "ffa-sp-all", "ffa-sp-all-clean" and
+# "ffa-sp-all-realclean" targets are defined.
+#
 # The build and the clean target are added to the dependency tree of common
 # op-tee targets.
 #
+
+.PHONY: ffa-sp-all
+.PHONY: ffa-sp-all-clean
+.PHONY: ffa-sp-all-realclean
+
+optee-os-common: ffa-sp-all
+optee-os-clean: ffa-sp-all-clean
+
+ffa-sp-all-realclean:
+	rm -rf $(TS_INSTALL_PREFIX)/opteesp
 
 define build-sp
 .PHONY: ffa-$1-sp
@@ -53,21 +69,58 @@ ffa-$1-sp-build: optee-os-spdevkit
 ffa-$1-sp-clean:
 	cmake --build $$(CURDIR)/../ts-build/$1 -- clean -j$$(nproc)
 
+.PHONY: ffa-$1-sp-realclean
 ffa-$1-sp-realclean:
 	rm -rf $$(CURDIR)/../ts-build/$1
 
-ffa-sp-realclean: ffa-$1-sp-realclean
-
-optee-os-common: ffa-$1-sp
-optee-os-clean: ffa-$1-sp-clean
-
+ffa-sp-all: ffa-$1-sp
+ffa-sp-all-clean: ffa-$1-sp-clean
+ffa-sp-all-realclean: ffa-$1-sp-realclean
 endef
 
 $(eval $(call build-sp,secure-storage))
 $(eval $(call build-sp,crypto))
 
-ffa-sp-realclean:
-	rm -rf $(TS_INSTALL_PREFIX)/opteesp
+# If FIP packaging method is selected, TF-A requires a number of config options:
+# - ARM_BL2_SP_LIST_DTS:   This file will be included into the TB_FW_CONFIG DT
+#                          of TF-A. It contains the UUID and load address of SP
+#                          packages present in the FIP, BL2 will load them based
+#                          on this information.
+# - ARM_SPMC_MANIFEST_DTS: Contains information about the SPMC: consumed by the
+#                          SPMD at SPMC init. And about the SP packages: the
+#                          SPMC can only know where the packages were loaded by
+#                          BL2 based on this file.
+# - SP_LAYOUT_FILE:        JSON file which describes the corresponding SP image
+#                          and SP manifest DT pairs, TF-A will create the SP
+#                          packages based on this. However, the TS build
+#                          provides a separate JSON file for each SP. A Python
+#                          snippet is used to merge these JSONs into one file.
+ifeq (fip, $(SP_PACKAGING_METHOD))
+SP_LAYOUT_FILE := $(TS_INSTALL_PREFIX)/opteesp/json/sp_layout.json
+
+TF_A_FLAGS+=SP_LAYOUT_FILE=$(SP_LAYOUT_FILE)
+TF_A_FLAGS+=ARM_BL2_SP_LIST_DTS=$(CURDIR)/fvp/bl2_sp_images.dtsi
+TF_A_FLAGS+=ARM_SPMC_MANIFEST_DTS=$(CURDIR)/fvp/spmc_manifest.dts
+OPTEE_OS_COMMON_EXTRA_FLAGS+=CFG_FIP_SP=y
+
+MERGE_JSON_PY := import json, sys
+MERGE_JSON_PY += \ncombined = {}
+MERGE_JSON_PY += \nfor path in sys.stdin.read().split():
+MERGE_JSON_PY += \n  with open(path) as f:
+MERGE_JSON_PY += \n    current = json.load(f)
+MERGE_JSON_PY += \n    combined = {**combined, **current}
+MERGE_JSON_PY += \nprint(json.dumps(combined, indent=4))
+
+$(SP_LAYOUT_FILE): ffa-sp-all
+	@echo $(TS_SP_JSON_LIST) | python3 -c "$$(echo -e '$(MERGE_JSON_PY)')" > $(SP_LAYOUT_FILE)
+
+.PHONY: ffa-sp-layout-clean
+ffa-sp-layout-clean:
+	@rm -f $(SP_LAYOUT_FILE)
+
+arm-tf: $(SP_LAYOUT_FILE)
+ffa-sp-all-clean: ffa-sp-layout-clean
+endif
 
 # Add targets to build the "arm_ffa_user" Linux Kernel module.
 arm_ffa_user: linux

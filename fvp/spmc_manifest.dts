@@ -1,0 +1,38 @@
+/* SPDX-License-Identifier: BSD-3-Clause */
+/*
+ * Copyright (c) 2021, Arm Limited. All rights reserved.
+ */
+
+/dts-v1/;
+
+/ {
+	compatible = "arm,ffa-core-manifest-1.0";
+	#address-cells = <2>;
+	#size-cells = <1>;
+
+	attribute {
+		spmc_id = <0x8000>;
+		maj_ver = <0x1>;
+		min_ver = <0x0>;
+		exec_state = <0x0>;
+		load_address = <0x0 0x6000000>;
+		entrypoint = <0x0 0x6000000>;
+		binary_size = <0x80000>;
+	};
+
+	optee_spmc {
+		compatible = "arm,optee-spmc";
+		maj_ver = <0x1>;
+		min_ver = <0x0>;
+		sp1 {
+			debug_name = "crypto";
+			load_address = <0x0 0x7100000>;
+			format = "elf";
+		};
+		sp2 {
+			debug_name = "secure_storage";
+			load_address = <0x0 0x7000000>;
+			format = "elf";
+		};
+	};
+};

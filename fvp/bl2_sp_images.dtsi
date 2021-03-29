@@ -1,0 +1,14 @@
+/* SPDX-License-Identifier: BSD-3-Clause */
+/*
+ * Copyright (c) 2021, Arm Limited. All rights reserved.
+ */
+
+secure-storage {
+	uuid = <0xdc1eef48 0xb17a4ccf 0xac8bdfcf 0xf7711b14>;
+	load-address = <0x7000000>;
+};
+
+crypto {
+	uuid = <0xd9df52d5 0x16a24bb2 0x9aa4d26d 0x3b84e8c0>;
+	load-address = <0x7100000>;
+};
