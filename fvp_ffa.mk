@@ -149,6 +149,9 @@ endif
 arm_ffa_user: linux
 	$(eval ROOT:=$(CURDIR)/..)
 	make -C $(CURDIR)/../linux_poc $(LINUX_COMMON_FLAGS) install
+	find $(TS_INSTALL_PREFIX)/opteesp/bin -name "[0-9a-f-]*.elf" -type f | \
+		sed -n "s@.*/\(.*\).stripped.elf@\1@gp" | tr '\n' ',' | \
+		head -c -1 > $(SHARED_DIR)/sp_uuid_list.txt
 
 arm_ffa_user_clean:
 	make -C $(CURDIR)/../linux_poc clean
