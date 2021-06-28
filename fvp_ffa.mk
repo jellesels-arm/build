@@ -7,6 +7,7 @@ SP_PACKAGING_METHOD		?= embedded
 
 OPTEE_OS_COMMON_EXTRA_FLAGS	+= CFG_CORE_SEL1_SPMC=y CFG_CORE_FFA=y
 OPTEE_OS_COMMON_EXTRA_FLAGS	+= CFG_WITH_SP=y
+OPTEE_OS_COMMON_EXTRA_FLAGS	+= CFG_CORE_HEAP_SIZE=131072
 OPTEE_OS_COMMON_EXTRA_FLAGS	+= O=out/arm
 
 TF_A_FLAGS ?= \
@@ -79,7 +80,8 @@ ffa-sp-all-clean: ffa-$1-sp-clean
 ffa-sp-all-realclean: ffa-$1-sp-realclean
 endef
 
-$(eval $(call build-sp,secure-storage))
+$(eval $(call build-sp,internal-trusted-storage))
+$(eval $(call build-sp,protected-storage))
 $(eval $(call build-sp,crypto))
 
 # If FIP packaging method is selected, TF-A requires a number of config options:

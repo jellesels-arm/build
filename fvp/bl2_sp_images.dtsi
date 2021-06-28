@@ -3,12 +3,17 @@
  * Copyright (c) 2021, Arm Limited. All rights reserved.
  */
 
-secure-storage {
+internal_trusted_storage {
 	uuid = <0xdc1eef48 0xb17a4ccf 0xac8bdfcf 0xf7711b14>;
 	load-address = <0x7000000>;
 };
 
-crypto {
+crypto_sp {
 	uuid = <0xd9df52d5 0x16a24bb2 0x9aa4d26d 0x3b84e8c0>;
 	load-address = <0x7100000>;
+};
+
+protected_storage_sp {
+	uuid = <0x751bf801 0x3dde4768 0xa5140f10 0xaeed1790>;
+	load-address = <0x7200000>;
 };

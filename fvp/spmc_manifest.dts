@@ -25,12 +25,17 @@
 		maj_ver = <0x1>;
 		min_ver = <0x0>;
 		sp1 {
-			debug_name = "crypto";
-			load_address = <0x0 0x7100000>;
+			debug_name = "protected_storage_sp";
+			load_address = <0x0 0x7200000>;
 			format = "elf";
 		};
 		sp2 {
-			debug_name = "secure_storage";
+			debug_name = "crypto_sp";
+			load_address = <0x0 0x7100000>;
+			format = "elf";
+		};
+		sp3 {
+			debug_name = "internal_trusted_storage";
 			load_address = <0x0 0x7000000>;
 			format = "elf";
 		};
