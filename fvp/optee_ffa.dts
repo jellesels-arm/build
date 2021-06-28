@@ -30,6 +30,10 @@
 			compatible = "arm,ffa-1.0-partition";
 			uuid = "751bf801-3dde-4768-a514-0f10aeed1790";
 		};
+		initial_attestation_sp {
+			compatible = "arm,ffa-1.0-partition";
+			uuid = "a1baf155-8876-4695-8f7c-54955e8db974";
+		};
 		internal_trusted_storage {
 			compatible = "arm,ffa-1.0-partition";
 			uuid = "dc1eef48-b17a-4ccf-ac8b-dfcff7711b14";

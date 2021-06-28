@@ -82,6 +82,7 @@ endef
 
 $(eval $(call build-sp,internal-trusted-storage))
 $(eval $(call build-sp,protected-storage))
+$(eval $(call build-sp,attestation))
 $(eval $(call build-sp,crypto))
 
 # If FIP packaging method is selected, TF-A requires a number of config options:

@@ -17,3 +17,8 @@ protected_storage_sp {
 	uuid = <0x751bf801 0x3dde4768 0xa5140f10 0xaeed1790>;
 	load-address = <0x7200000>;
 };
+
+initial_attestation_sp {
+	uuid = "a1baf155-8876-4695-8f7c-54955e8db974";
+	load-address = <0x7300000>;
+};
