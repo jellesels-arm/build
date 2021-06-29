@@ -54,16 +54,16 @@ ffa-sp-all-realclean:
 
 define build-sp
 .PHONY: ffa-$1-sp
-ffa-$1-sp: ffa-$1-sp-build
-	$$(eval include $${TS_INSTALL_PREFIX}/opteesp/lib/make/$1.mk)
+ffa-$1-sp: ${TS_INSTALL_PREFIX}/opteesp/lib/make/$1.mk
 
-.PHONY: ffa-$1-sp-build
-ffa-$1-sp-build: optee-os-spdevkit
+${TS_INSTALL_PREFIX}/opteesp/lib/make/$1.mk: optee-os-spdevkit
 	CROSS_COMPILE="$$(AARCH64_CROSS_COMPILE)" cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$${TS_INSTALL_PREFIX} \
 		-DSP_DEV_KIT_DIR=$$(CURDIR)/../optee_os/out/arm/export-sp_arm64 \
 		-S $$(CURDIR)/../trusted-services/deployments/$1/opteesp -B $$(CURDIR)/../ts-build/$1
 	cmake --build $$(CURDIR)/../ts-build/$1 -- -j$$(nproc)
 	cmake --install $$(CURDIR)/../ts-build/$1
+
+-include ${TS_INSTALL_PREFIX}/opteesp/lib/make/$1.mk
 
 .PHONY: ffa-$1-sp-clean
 ffa-$1-sp-clean:
@@ -73,7 +73,8 @@ ffa-$1-sp-clean:
 ffa-$1-sp-realclean:
 	rm -rf $$(CURDIR)/../ts-build/$1
 
-ffa-sp-all: ffa-$1-sp
+ffa-sp-all: ${TS_INSTALL_PREFIX}/opteesp/lib/make/$1.mk
+
 ffa-sp-all-clean: ffa-$1-sp-clean
 ffa-sp-all-realclean: ffa-$1-sp-realclean
 endef
