@@ -130,29 +130,6 @@ arm-tf: $(SP_LAYOUT_FILE)
 ffa-sp-all-clean: ffa-sp-layout-clean
 endif
 
-# If embedded packaging method is selected, the SP manifest files from TS have
-# to be merged into a common DTS file, which is passed to OP-TEE as the embedded
-# DT file. For each SP a dtsi file is exported from TS, which contains a single
-# node, representing that SP.
-# The TS_SP_DTSI_LIST parameter contains a line like this for each SP:
-#
-# #include "<absolute_path_to_dtsi>/<sp_uuid>.dtsi"
-#
-ifeq (embedded, $(SP_PACKAGING_METHOD))
-SP_MANIFEST_FILE := $(OUT_PATH)/sp_manifest.dts
-OPTEE_OS_COMMON_EXTRA_FLAGS+=CFG_EMBED_DTB_SOURCE_FILE=$(SP_MANIFEST_FILE)
-
-$(SP_MANIFEST_FILE): ffa-sp-all
-	@echo -e "/dts-v1/;\n/ {$(TS_SP_DTSI_LIST)\n};" > $(SP_MANIFEST_FILE)
-
-.PHONY: ffa-sp-manifest-clean
-ffa-sp-manifest-clean:
-	@rm -f $(SP_MANIFEST_FILE)
-
-optee-os-common: $(SP_MANIFEST_FILE)
-ffa-sp-all-clean: ffa-sp-manifest-clean
-endif
-
 # Add targets to build the "arm_ffa_user" Linux Kernel module.
 arm_ffa_user: linux
 	$(eval ROOT:=$(CURDIR)/..)
