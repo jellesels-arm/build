@@ -8,6 +8,7 @@ SP_PACKAGING_METHOD		?= embedded
 OPTEE_OS_COMMON_EXTRA_FLAGS	+= CFG_CORE_SEL1_SPMC=y CFG_CORE_FFA=y
 OPTEE_OS_COMMON_EXTRA_FLAGS	+= CFG_WITH_SP=y
 OPTEE_OS_COMMON_EXTRA_FLAGS	+= CFG_CORE_HEAP_SIZE=131072
+OPTEE_OS_COMMON_EXTRA_FLAGS	+= CFG_SECURE_PARTITION=y
 OPTEE_OS_COMMON_EXTRA_FLAGS	+= O=out/arm
 
 TF_A_FLAGS ?= \
@@ -54,26 +55,26 @@ ffa-sp-all-realclean:
 	rm -rf $(TS_INSTALL_PREFIX)/opteesp
 
 define build-sp
-.PHONY: ffa-$1-sp
-ffa-$1-sp: ${TS_INSTALL_PREFIX}/opteesp/lib/make/$1.mk
+.PHONY: ffa-$1$3-sp
+ffa-$1$3-sp: ${TS_INSTALL_PREFIX}/opteesp/lib/make/$1$3.mk
 
-${TS_INSTALL_PREFIX}/opteesp/lib/make/$1.mk:
+{TS_INSTALL_PREFIX}/opteesp/lib/make/$1.mk:
 	CROSS_COMPILE="$$(AARCH64_CROSS_COMPILE)" cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$${TS_INSTALL_PREFIX} \
-		-S $$(CURDIR)/../trusted-services/deployments/$1/opteesp -B $$(CURDIR)/../ts-build/$1
-	cmake --build $$(CURDIR)/../ts-build/$1 -- -j$$(nproc)
-	cmake --install $$(CURDIR)/../ts-build/$1
+		-S $$(CURDIR)/../trusted-services/deployments/$1/opteesp -B $$(CURDIR)/../ts-build/$1$3  -D$2=$3
+	cmake --build $$(CURDIR)/../ts-build/$1$3 -- -j$$(nproc)
+	cmake --install $$(CURDIR)/../ts-build/$1$3
 
--include ${TS_INSTALL_PREFIX}/opteesp/lib/make/$1.mk
+-include ${TS_INSTALL_PREFIX}/opteesp/lib/make/$1$3.mk
 
-.PHONY: ffa-$1-sp-clean
-ffa-$1-sp-clean:
-	cmake --build $$(CURDIR)/../ts-build/$1 -- clean -j$$(nproc)
+.PHONY: ffa-$1$3-sp-clean
+ffa-$1$3-sp-clean:
+	cmake --build $$(CURDIR)/../ts-build/$1$3 -- clean -j$$(nproc)
 
-.PHONY: ffa-$1-sp-realclean
-ffa-$1-sp-realclean:
-	rm -rf $$(CURDIR)/../ts-build/$1
+.PHONY: ffa-$1$3-sp-realclean
+ffa-$1$3-sp-realclean:
+	rm -rf $$(CURDIR)/../ts-build/$1$3
 
-ffa-sp-all: ${TS_INSTALL_PREFIX}/opteesp/lib/make/$1.mk
+ffa-sp-all: ${TS_INSTALL_PREFIX}/opteesp/lib/make/$1$3.mk
 
 ffa-sp-all-clean: ffa-$1-sp-clean
 ffa-sp-all-realclean: ffa-$1-sp-realclean
@@ -83,6 +84,10 @@ $(eval $(call build-sp,internal-trusted-storage))
 $(eval $(call build-sp,protected-storage))
 $(eval $(call build-sp,attestation))
 $(eval $(call build-sp,crypto))
+$(eval $(call build-sp,spm_test,SP_NUMBER,1))
+$(eval $(call build-sp,spm_test,SP_NUMBER,2))
+$(eval $(call build-sp,spm_test,SP_NUMBER,3))
+
 
 # If FIP packaging method is selected, TF-A requires a number of config options:
 # - ARM_BL2_SP_LIST_DTS:   This file will be included into the TB_FW_CONFIG DT
