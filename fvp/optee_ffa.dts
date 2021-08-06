@@ -22,22 +22,6 @@
 
 	ffa {
 		compatible = "arm,ffa-1.0";
-		crypto_sp {
-			compatible = "arm,ffa-1.0-partition";
-			uuid = "d9df52d5-16a2-4bb2-9aa4-d26d3b84e8c0";
-		};
-		protected_storage_sp {
-			compatible = "arm,ffa-1.0-partition";
-			uuid = "751bf801-3dde-4768-a514-0f10aeed1790";
-		};
-		initial_attestation_sp {
-			compatible = "arm,ffa-1.0-partition";
-			uuid = "a1baf155-8876-4695-8f7c-54955e8db974";
-		};
-		internal_trusted_storage {
-			compatible = "arm,ffa-1.0-partition";
-			uuid = "dc1eef48-b17a-4ccf-ac8b-dfcff7711b14";
-		};
 		spm_test1 {
 			compatible = "arm,ffa-1.0-partition";
 			uuid = "7817164c-c40c-4d1a-867a-9bb2278cf41a";
