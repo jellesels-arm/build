@@ -80,10 +80,10 @@ ffa-sp-all-clean: ffa-$1-sp-clean
 ffa-sp-all-realclean: ffa-$1-sp-realclean
 endef
 
-$(eval $(call build-sp,internal-trusted-storage))
-$(eval $(call build-sp,protected-storage))
-$(eval $(call build-sp,attestation))
-$(eval $(call build-sp,crypto))
+#$(eval $(call build-sp,internal-trusted-storage))
+#$(eval $(call build-sp,protected-storage))
+#$(eval $(call build-sp,attestation))
+#$(eval $(call build-sp,crypto))
 $(eval $(call build-sp,spm_test,SP_NUMBER,1))
 $(eval $(call build-sp,spm_test,SP_NUMBER,2))
 $(eval $(call build-sp,spm_test,SP_NUMBER,3))
