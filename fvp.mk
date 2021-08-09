@@ -242,28 +242,119 @@ dtb: $(DTB)
 run: all
 	$(MAKE) run-only
 
-run-only:
-ifeq ($(USE_FVP_BASE_PLAT),1)
-	$(FVP_PATH)/$(FVP_BIN) \
+cmd := " sleep 1; telnet localhost 4900"
+
+run-urxvt:
+	killall FVP_Base_RevC-2xAEMv8A || true
+	/home/jelsel01/Documents/scripts/telnet_urxvt.sh $(cmd)1 "Secure World"
+	/home/jelsel01/Documents/scripts/telnet_urxvt.sh $(cmd)0 "Normal World"
+
+run-test:
+	killall FVP_Base_RevC-2xAEMv8A || true
+	~/Documents/scripts/expect/xtest.exp $(TF_A_PATH) $(TF_A_BUILD) $(ROOT) ${SHARED_DIR}
+
+run-ts-test:
+	killall FVP_Base_RevC-2xAEMv8A || true
+	/home/jelsel01/Documents/scripts/telnet_urxvt.sh $(cmd)1 "Secure World"
+	~/Documents/scripts/expect/ts.exp
+
+run-fvp-trace:
+	/home/jelsel01/fvp/models/Linux64_GCC-6.4/FVP_Base_RevC-2xAEMv8A \
 	-C bp.flashloader0.fname=$(TF_A_PATH)/build/fvp/$(TF_A_BUILD)/fip.bin \
 	-C bp.secureflashloader.fname=$(TF_A_PATH)/build/fvp/$(TF_A_BUILD)/bl1.bin \
 	-C bp.secure_memory=1 \
+	-C bp.terminal_0.start_port=49000 \
+	-C bp.terminal_1.start_port=49001 \
+	-C bp.terminal_2.start_port=49002 \
+	-C bp.terminal_3.start_port=49003 \
+	-C bp.ve_sysregs.mmbSiteDefault=0 \
 	-C bp.ve_sysregs.exit_on_shutdown=1 \
-	-C bp.virtioblockdevice.image_path=$(BOOT_IMG) \
-	-C bp.virtiop9device.root_path=$(SHARED_DIR) \
+	-C bp.virtioblockdevice.image_path=$(ROOT)/out/boot-fat.uefi.img \
 	-C cache_state_modelled=0 \
 	-C cluster0.NUM_CORES=4 \
 	-C cluster1.NUM_CORES=4 \
-	-C pctl.startup=0.0.0.0
-else
-	@cd $(FOUNDATION_PATH); \
-	$(FOUNDATION_PATH)/models/Linux64_GCC-6.4/Foundation_Platform \
-	--arm-v8.0 \
-	--cores=4 \
-	--secure-memory \
-	--visualization \
-	--gicv3 \
-	--data="$(TF_A_PATH)/build/fvp/$(TF_A_BUILD)/bl1.bin"@0x0 \
-	--data="$(TF_A_PATH)/build/fvp/$(TF_A_BUILD)/fip.bin"@0x8000000 \
-	--block-device=$(BOOT_IMG)
-endif
+	-C bp.virtiop9device.root_path=${SHARED_DIR} \
+	-C pctl.startup=0.0.0.0 \
+	-C bp.vis.disable_visualisation=1 \
+	 --plugin /home/jelsel01/Documents/scripts/SecureTrace/module/SecureTrace.so
+
+run-fvp-trace-sources:
+	/home/jelsel01/fvp/models/Linux64_GCC-6.4/FVP_Base_RevC-2xAEMv8A \
+	-C bp.secure_memory=1 \
+	-C bp.terminal_0.start_port=49000 \
+	-C bp.terminal_1.start_port=49001 \
+	-C bp.terminal_2.start_port=49002 \
+	-C bp.terminal_3.start_port=49003 \
+	-C bp.ve_sysregs.mmbSiteDefault=0 \
+	-C bp.ve_sysregs.exit_on_shutdown=1 \
+	-C cache_state_modelled=0 \
+	-C cluster0.NUM_CORES=4 \
+	-C cluster1.NUM_CORES=4 \
+	-C bp.virtiop9device.root_path=${SHARED_DIR} \
+	-C pctl.startup=0.0.0.0 \
+	-C bp.vis.disable_visualisation=1 \
+	--plugin /home/jelsel01/fvp/FastModelsPortfolio_11.11/examples/MTI/ListTraceSources/source/ListTraceSources.so
+
+run-fvp:
+	/home/jelsel01/fvp/models/Linux64_GCC-6.4/FVP_Base_RevC-2xAEMv8A \
+	-C bp.flashloader0.fname=$(TF_A_PATH)/build/fvp/$(TF_A_BUILD)/fip.bin \
+	-C bp.secureflashloader.fname=$(TF_A_PATH)/build/fvp/$(TF_A_BUILD)/bl1.bin \
+	-C bp.secure_memory=1 \
+	-C bp.terminal_0.start_port=49000 \
+	-C bp.terminal_1.start_port=49001 \
+	-C bp.terminal_2.start_port=49002 \
+	-C bp.terminal_3.start_port=49003 \
+	-C bp.ve_sysregs.mmbSiteDefault=0 \
+	-C bp.ve_sysregs.exit_on_shutdown=1 \
+	-C bp.virtioblockdevice.image_path=$(ROOT)/out/boot-fat.uefi.img \
+	-C cache_state_modelled=0 \
+	-C cluster0.NUM_CORES=4 \
+	-C cluster1.NUM_CORES=4 \
+	-C bp.virtiop9device.root_path=${SHARED_DIR} \
+	-C pctl.startup=0.0.0.0 \
+	-C bp.vis.disable_visualisation=1
+
+run-fvp-debug:
+	/home/jelsel01/fvp/models/Linux64_GCC-6.4/FVP_Base_RevC-2xAEMv8A  -S \
+	-C bp.flashloader0.fname=$(TF_A_PATH)/build/fvp/$(TF_A_BUILD)/fip.bin \
+	-C bp.secureflashloader.fname=$(TF_A_PATH)/build/fvp/$(TF_A_BUILD)/bl1.bin \
+	-C bp.secure_memory=1 \
+	-C bp.terminal_0.start_port=49000 \
+	-C bp.terminal_1.start_port=49001 \
+	-C bp.terminal_2.start_port=49002 \
+	-C bp.terminal_3.start_port=49003 \
+	-C bp.ve_sysregs.mmbSiteDefault=0 \
+	-C bp.ve_sysregs.exit_on_shutdown=1 \
+	-C bp.virtioblockdevice.image_path=$(ROOT)/out/boot-fat.uefi.img \
+	-C cache_state_modelled=0 \
+	-C cluster0.NUM_CORES=4 \
+	-C cluster1.NUM_CORES=4 \
+	-C bp.virtiop9device.root_path=${SHARED_DIR} \
+	-C pctl.startup=0.0.0.0 \
+	-C bp.vis.disable_visualisation=1 \
+
+
+run-fvp-internal:
+	/home/jelsel01/fvp/models/Linux64_GCC-6.4/FVP_Base_RevC-2xAEMv8A  -S \
+	-C bp.flashloader0.fname=$(TF_A_PATH)/build/fvp/$(TF_A_BUILD)/fip.bin \
+	-C bp.secureflashloader.fname=$(TF_A_PATH)/build/fvp/$(TF_A_BUILD)/bl1.bin \
+	-C bp.secure_memory=1 \
+	-C bp.terminal_0.start_port=49000 \
+	-C bp.terminal_1.start_port=49001 \
+	-C bp.terminal_2.start_port=49002 \
+	-C bp.terminal_3.start_port=49003 \
+	-C bp.ve_sysregs.mmbSiteDefault=0 \
+	-C bp.ve_sysregs.exit_on_shutdown=1 \
+	-C bp.virtioblockdevice.image_path=/home/jelsel01/projects/github/optee_jelle/internal.img \
+	-C cache_state_modelled=0 \
+	-C cluster0.NUM_CORES=4 \
+	-C cluster1.NUM_CORES=4 \
+	-C bp.virtiop9device.root_path=${SHARED_DIR} \
+	-C pctl.startup=0.0.0.0 \
+	-C bp.vis.disable_visualisation=1 \
+
+run-only: run-urxvt run-fvp
+run-debug: run-urxvt run-fvp-debug
+run-internal: run-urxvt run-fvp-debug
+run-trace: run-urxvt run-fvp-trace
+run-xtest: run-test
