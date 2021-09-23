@@ -251,7 +251,7 @@ run-urxvt:
 
 run-test:
 	killall FVP_Base_RevC-2xAEMv8A || true
-	~/Documents/scripts/expect/xtest.exp $(TF_A_PATH) $(TF_A_BUILD) $(ROOT) ${SHARED_DIR}
+	~/Documents/scripts/expect/xtest.py --TF-A-PATH $(TF_A_PATH) --TF-A-BUILD $(TF_A_BUILD) --ROOT $(ROOT) --SHARED-DIR ${SHARED_DIR} --FVP-PATH /home/jelsel01/fvp/models/Linux64_GCC-6.4/FVP_Base_RevC-2xAEMv8A --DEBUGGER /opt/arm/developmentstudio_platinum-2019.b/bin/armdbg
 
 run-ts-test:
 	killall FVP_Base_RevC-2xAEMv8A || true
