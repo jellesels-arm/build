@@ -57,9 +57,8 @@ define build-sp
 .PHONY: ffa-$1-sp
 ffa-$1-sp: ${TS_INSTALL_PREFIX}/opteesp/lib/make/$1.mk
 
-${TS_INSTALL_PREFIX}/opteesp/lib/make/$1.mk: optee-os-spdevkit
+${TS_INSTALL_PREFIX}/opteesp/lib/make/$1.mk:
 	CROSS_COMPILE="$$(AARCH64_CROSS_COMPILE)" cmake -G"Unix Makefiles" -DCMAKE_INSTALL_PREFIX=$${TS_INSTALL_PREFIX} \
-		-DSP_DEV_KIT_DIR=$$(CURDIR)/../optee_os/out/arm/export-sp_arm64 \
 		-S $$(CURDIR)/../trusted-services/deployments/$1/opteesp -B $$(CURDIR)/../ts-build/$1
 	cmake --build $$(CURDIR)/../ts-build/$1 -- -j$$(nproc)
 	cmake --install $$(CURDIR)/../ts-build/$1

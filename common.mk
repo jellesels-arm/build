@@ -439,10 +439,6 @@ OPTEE_OS_COMMON_FLAGS ?= \
 optee-os-common:
 	$(MAKE) -C $(OPTEE_OS_PATH) $(OPTEE_OS_COMMON_FLAGS)
 
-.PHONY: optee-os-spdevkit-common
-optee-os-spdevkit-common:
-	$(MAKE) -C $(OPTEE_OS_PATH) $(OPTEE_OS_COMMON_FLAGS) sp_dev_kit
-
 .PHONY: optee-os-clean-common
 ifeq ($(CFG_TEE_BENCHMARK),y)
 optee-os-clean-common: benchmark-app-clean-common

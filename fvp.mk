@@ -138,8 +138,6 @@ optee-os: optee-os-common
 
 optee-os-clean: optee-os-clean-common
 
-optee-os-spdevkit: optee-os-spdevkit-common
-
 ################################################################################
 # grub
 ################################################################################
